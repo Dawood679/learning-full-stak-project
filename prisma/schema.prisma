@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Category {
+  FRONTEND
+  BACKEND
+  DATABASES
+  ADVANCED_BACKEND
+  INFRASTRUCTURE
+  CLOUD_DEVOPS
+}
+
+model Topic {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String
+  category    Category
+  icon        String
+  order       Int
+  difficulty  Difficulty
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([category])
+  @@index([slug])
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  topicId       String
+  topic         Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questionText  String
+  options       Json
+  correctAnswer Int
+  explanation   String
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([topicId])
+}
