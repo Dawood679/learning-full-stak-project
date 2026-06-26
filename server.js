@@ -12,6 +12,9 @@ const handle = app.getRequestHandler()
 // userId -> { totalSeconds: number, sessionStart: number|null, connections: number }
 const userSessions = new Map()
 
+// Set of currently online userIds (at least one tab open)
+const onlineUsers = new Set()
+
 function getSession(userId) {
   if (!userSessions.has(userId)) {
     userSessions.set(userId, { totalSeconds: 0, sessionStart: null, connections: 0 })
@@ -33,11 +36,9 @@ function getTodayKey() {
 async function runAttendanceCheck() {
   console.log("[Attendance] Running 5 PM check...")
 
-  // Accumulate any still-active sessions before checking
   for (const data of userSessions.values()) {
     if (data.sessionStart !== null) {
       data.totalSeconds += Math.floor((Date.now() - data.sessionStart) / 1000)
-      // keep sessionStart for ongoing sessions
       data.sessionStart = Date.now()
     }
   }
@@ -81,6 +82,10 @@ app.prepare().then(() => {
     cors: { origin: "*", methods: ["GET", "POST"] },
   })
 
+  function broadcastOnlineList() {
+    io.to("admins").emit("online:users", [...onlineUsers])
+  }
+
   io.on("connection", (socket) => {
     const userId = socket.handshake.auth?.userId
     if (!userId) {
@@ -88,23 +93,35 @@ app.prepare().then(() => {
       return
     }
 
+    // --- timing ---
     const data = getSession(userId)
     data.connections++
     if (data.connections === 1) {
-      // First tab — start the clock
       data.sessionStart = Date.now()
     }
 
+    // --- online status ---
+    onlineUsers.add(userId)
+    broadcastOnlineList()
+
+    // --- events ---
     socket.on("ping", () => {
       socket.emit("pong")
+    })
+
+    // Admin subscribes to live online list
+    socket.on("subscribe:online", () => {
+      socket.join("admins")
+      socket.emit("online:users", [...onlineUsers])
     })
 
     socket.on("disconnect", () => {
       const d = getSession(userId)
       d.connections = Math.max(0, d.connections - 1)
       if (d.connections === 0) {
-        // Last tab closed — stop the clock
         accumulateTime(d)
+        onlineUsers.delete(userId)
+        broadcastOnlineList()
       }
     })
   })
@@ -116,18 +133,17 @@ app.prepare().then(() => {
     const now = new Date()
     const todayKey = getTodayKey()
 
-    // Reset data at midnight
     if (lastCheckedDay && lastCheckedDay !== todayKey) {
       userSessions.clear()
+      onlineUsers.clear()
       console.log("[Attendance] New day — session data reset.")
     }
     lastCheckedDay = todayKey
 
-    // Trigger at 17:00 (once per day)
     if (now.getHours() === 17 && now.getMinutes() === 0) {
       const checkKey = `${todayKey}-checked`
       if (!userSessions.has(checkKey)) {
-        userSessions.set(checkKey, true) // sentinel so it runs only once
+        userSessions.set(checkKey, true)
         await runAttendanceCheck()
       }
     }
