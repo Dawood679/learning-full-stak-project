@@ -4,6 +4,8 @@ import { LanguageProvider } from "@/lib/i18n/LanguageContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { SmoothScroll } from "@/components/SmoothScroll"
+import { PresenceTracker } from "@/components/PresenceTracker"
+import { auth } from "@/lib/auth"
 import "./globals.css"
 
 const inter = Inter({
@@ -32,7 +34,10 @@ export const metadata = {
   },
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await auth()
+  const userId = session?.user?.id ?? null
+
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body>
@@ -44,6 +49,7 @@ export default function RootLayout({ children }) {
         >
           <LanguageProvider>
             <SmoothScroll>
+              {userId && <PresenceTracker userId={userId} />}
               <Navbar />
               <main className="min-h-screen">{children}</main>
               <Footer />

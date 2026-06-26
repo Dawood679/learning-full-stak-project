@@ -1,6 +1,5 @@
 import { auth, signIn } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { Code2, AlertCircle } from "lucide-react"
 
 export const metadata = {
@@ -85,13 +84,6 @@ export default async function SignInPage({ searchParams }) {
               Sign In
             </button>
           </form>
-
-          <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-5">
-            Account nahi hai?{" "}
-            <Link href="/register" className="text-violet-600 dark:text-violet-400 font-medium hover:underline">
-              Register karo
-            </Link>
-          </p>
 
           <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-4">
             Classes start{" "}
