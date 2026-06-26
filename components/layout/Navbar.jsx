@@ -1,18 +1,14 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Code2, BookOpen } from "lucide-react"
+import { Code2 } from "lucide-react"
+import { auth } from "@/lib/auth"
 import { ThemeToggle } from "./ThemeToggle"
-import { cn } from "@/lib/utils"
+import { NavLinks } from "./NavLinks"
+import { LanguageToggle } from "./LanguageToggle"
+import { NavUserSection } from "./NavUserSection"
 
-export function Navbar() {
-  const pathname = usePathname()
-
-  const links = [
-    { href: "/",      label: "Home" },
-    { href: "/learn", label: "Topics" },
-  ]
+export async function Navbar() {
+  const session = await auth()
+  const user = session?.user
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
@@ -26,33 +22,13 @@ export function Navbar() {
           <span className="gradient-text">DevOnix</span>
         </Link>
 
-        {/* ── Nav links ── */}
-        <div className="flex items-center gap-1">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-semibold transition-colors",
-                pathname === link.href
-                  ? "bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/70"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        {/* ── Nav links (client for active state) ── */}
+        <NavLinks user={user} />
 
-        {/* ── Right ── */}
+        {/* ── Right side ── */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/learn"
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors shadow-sm shadow-violet-500/25"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            Start Learning
-          </Link>
+          <NavUserSection user={user} />
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </nav>

@@ -1,31 +1,7 @@
-import { BookOpenText, FlaskConical, TrendingUp } from "lucide-react"
+"use client"
 
-const features = [
-  {
-    step: "01",
-    icon: BookOpenText,
-    title: "Read the Concept",
-    description:
-      "Every topic has a clear 2–3 paragraph explanation with real-world context, key concepts, and a working code example.",
-    accent: "violet",
-  },
-  {
-    step: "02",
-    icon: FlaskConical,
-    title: "Take the Quiz",
-    description:
-      "5–8 multiple-choice questions with instant feedback and detailed explanations so you learn from every answer.",
-    accent: "indigo",
-  },
-  {
-    step: "03",
-    icon: TrendingUp,
-    title: "Track Your Score",
-    description:
-      "Best scores are saved in your browser. See which topics you've mastered and which need more review.",
-    accent: "cyan",
-  },
-]
+import { BookOpenText, FlaskConical, TrendingUp } from "lucide-react"
+import { useT } from "@/lib/i18n/LanguageContext"
 
 const accentMap = {
   violet: {
@@ -58,6 +34,32 @@ const accentMap = {
 }
 
 export function FeaturesSection() {
+  const t = useT()
+
+  const features = [
+    {
+      step: "01",
+      icon: BookOpenText,
+      title: t("feat1Title"),
+      description: t("feat1Desc"),
+      accent: "violet",
+    },
+    {
+      step: "02",
+      icon: FlaskConical,
+      title: t("feat2Title"),
+      description: t("feat2Desc"),
+      accent: "indigo",
+    },
+    {
+      step: "03",
+      icon: TrendingUp,
+      title: t("feat3Title"),
+      description: t("feat3Desc"),
+      accent: "cyan",
+    },
+  ]
+
   return (
     <section className="py-20 bg-slate-50 dark:bg-[#07070f]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +67,7 @@ export function FeaturesSection() {
         {/* Header */}
         <div className="text-center mb-14">
           <p className="text-sm font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-3">
-            How it works
+            {t("featTitle")}
           </p>
           <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
             Three steps to mastery
@@ -116,7 +118,7 @@ export function FeaturesSection() {
 
         {/* Connector line between cards (desktop) */}
         <div className="hidden md:flex items-center justify-center mt-10 gap-2">
-          {["Read", "Quiz", "Score"].map((label, i) => (
+          {[t("featConnRead"), t("featConnQuiz"), t("featConnScore")].map((label, i) => (
             <div key={label} className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <div className={`w-2 h-2 rounded-full ${["bg-violet-400","bg-indigo-400","bg-cyan-400"][i]}`} />

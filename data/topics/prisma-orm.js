@@ -1,63 +1,89 @@
 export const prismaOrmContent = {
   slug: "prisma-orm",
   briefDescription: [
-    "Prisma is a next-generation ORM for Node.js and TypeScript/JavaScript. It consists of Prisma Client (auto-generated, type-safe query builder), Prisma Migrate (declarative database migrations), and Prisma Studio (GUI for your database).",
-    "Prisma's schema-first approach means you define your data model in schema.prisma, and Prisma generates the database migrations and the client code. This single source of truth eliminates mismatches between your models and database.",
-    "Prisma Client provides an intuitive API for CRUD operations, filtering, sorting, pagination, relations, aggregations, and raw queries. It supports PostgreSQL, MySQL, SQLite, SQL Server, MongoDB, and CockroachDB.",
+    "Prisma is a next-generation ORM (Object-Relational Mapper) for Node.js that works with PostgreSQL, MySQL, SQLite, and MongoDB. It has three main components: Prisma Client (auto-generated, type-safe query builder), Prisma Migrate (declarative schema migrations — creates .sql files), and Prisma Studio (visual GUI to browse and edit your database). You define your entire data model in a single schema.prisma file using Prisma's schema language, then Prisma generates the TypeScript/JavaScript client code automatically.",
+    "The Prisma schema defines models (tables) with fields, types, constraints, and relations. Relations use @relation to link models: one-to-many (User → Posts[]), many-to-many (Posts ↔ Tags via implicit join table), and one-to-one. After changing the schema, run 'npx prisma db push' for development (applies changes directly, no migration files) or 'npx prisma migrate dev' for production (creates versioned .sql migration files). Run 'npx prisma generate' to regenerate the Prisma Client after schema changes.",
+    "Prisma Client provides an intuitive, type-safe API: prisma.user.findMany()/findUnique() for reads, create()/createMany() for inserts, update()/upsert() for updates, and delete() for deletions. The 'where' option filters, 'orderBy' sorts, 'select' picks specific fields, 'include' eager-loads relations (like JOIN), 'skip'/'take' paginate. prisma.$transaction([...]) runs multiple operations atomically. The 'upsert' operation creates-if-not-found or updates-if-found based on a unique identifier.",
   ],
   keyConcepts: [
-    "Schema: model, fields, types, @id, @unique, @default",
-    "Relations: @relation, one-to-many, many-to-many",
-    "CRUD: findMany, findUnique, create, update, upsert, delete",
-    "Filtering: where, AND, OR, NOT, contains, startsWith",
-    "Select & Include: control returned fields and eager load relations",
-    "Transactions: prisma.$transaction([...]) and interactive tx",
-    "Prisma Migrate: prisma migrate dev, deploy, reset",
-    "Middleware and soft deletes",
+    "Three components: Prisma Client (queries), Prisma Migrate (migrations), Prisma Studio (GUI)",
+    "schema.prisma: single source of truth — models, fields, types, relations, constraints",
+    "Prisma types: String, Int, Float, Boolean, DateTime, Json, @id, @unique, @default",
+    "Relations: @relation — one-to-many (User has Post[]), many-to-many, one-to-one",
+    "'npx prisma db push': sync schema to DB directly (no migration files — for development)",
+    "'npx prisma migrate dev': create versioned .sql files (for production and version control)",
+    "'npx prisma generate': regenerate Prisma Client after schema changes",
+    "CRUD: findMany, findUnique, create, update, upsert, delete, deleteMany",
+    "Filtering: where, AND, OR, NOT, contains, startsWith, gt, gte, lt, lte",
+    "Select vs Include: select picks fields, include eager-loads related models",
+    "Pagination: skip (offset) and take (limit) options",
+    "prisma.$transaction([...]): run multiple operations atomically — all or nothing",
   ],
   codeExample: {
     language: "javascript",
-    title: "Prisma CRUD, Relations & Transactions",
-    code: `import { PrismaClient } from '@prisma/client'
+    title: "Prisma CRUD, Relations, Upsert, and Transactions",
+    code: `// schema.prisma
+// model User {
+//   id        String   @id @default(cuid())
+//   email     String   @unique
+//   name      String?
+//   role      Role     @default(STUDENT)
+//   posts     Post[]
+//   createdAt DateTime @default(now())
+// }
+// model Post {
+//   id       String @id @default(cuid())
+//   title    String
+//   author   User   @relation(fields: [authorId], references: [id])
+//   authorId String
+// }
+// enum Role { STUDENT ADMIN }
+
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
-// Create with nested relation
+// ── CREATE ────────────────────────────────────────
 const user = await prisma.user.create({
   data: {
-    email: 'alice@example.com',
-    profile: {
-      create: { bio: 'Full-stack developer' }
-    },
+    email: 'ali@devonix.io',
+    name: 'Ali Khan',
     posts: {
-      create: [{ title: 'Hello World', published: true }]
+      create: { title: 'My first post' }  // nested create relation
     }
   },
-  include: { profile: true, posts: true }
+  include: { posts: true }  // return user + their posts
 })
 
-// Filtered query with pagination
-const posts = await prisma.post.findMany({
+// ── READ ─────────────────────────────────────────
+const users = await prisma.user.findMany({
   where: {
-    published: true,
-    author: { email: { contains: '@example.com' } }
+    role: 'STUDENT',
+    email: { contains: '@devonix' },
+    createdAt: { gte: new Date('2026-07-01') },
   },
   orderBy: { createdAt: 'desc' },
   skip: 0,
   take: 10,
-  select: { id: true, title: true, author: { select: { name: true } } }
+  select: { id: true, name: true, email: true },  // only these fields
 })
 
-// Interactive transaction
-const result = await prisma.$transaction(async (tx) => {
-  const debit = await tx.account.update({
-    where: { id: 'acc1' },
-    data: { balance: { decrement: 100 } }
-  })
-  if (debit.balance < 0) throw new Error('Insufficient funds')
-  return tx.account.update({
-    where: { id: 'acc2' },
-    data: { balance: { increment: 100 } }
-  })
-})`,
+// ── UPSERT ────────────────────────────────────────
+// Create if not found, update if found
+const attendance = await prisma.attendance.upsert({
+  where: { userId_sessionId: { userId, sessionId } },  // @@unique
+  update: { status: 'PRESENT', quizScore: 80 },
+  create: { userId, sessionId, status: 'PRESENT', quizScore: 80 },
+})
+
+// ── TRANSACTION ───────────────────────────────────
+// Both operations succeed, or both are rolled back
+const [quiz, attendance2] = await prisma.$transaction([
+  prisma.quizAttempt.create({ data: { userId, topicSlug, score: 85 } }),
+  prisma.attendance.upsert({
+    where: { userId_sessionId: { userId, sessionId } },
+    update: { status: 'PRESENT' },
+    create: { userId, sessionId, status: 'PRESENT' },
+  }),
+])`,
   },
 }

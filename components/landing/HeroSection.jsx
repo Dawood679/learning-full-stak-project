@@ -1,7 +1,11 @@
+"use client"
+
 import Link from "next/link"
 import { ArrowRight, BookOpen, Sparkles, CheckCircle2, Flame, Star } from "lucide-react"
+import { useT } from "@/lib/i18n/LanguageContext"
 
 export function HeroSection() {
+  const t = useT()
   return (
     <section className="relative min-h-[92vh] flex items-center overflow-hidden">
 
@@ -20,21 +24,19 @@ export function HeroSection() {
           {/* ── Badge ── */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 text-sm font-semibold mb-8 border border-violet-200 dark:border-violet-500/30 shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
-            24 Topics · 170+ Quiz Questions
+            {t("heroBadge")}
           </div>
 
           {/* ── Headline ── */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.08] max-w-4xl">
-            Master{" "}
-            <span className="gradient-text">Full-Stack</span>
-            {" "}Dev
+            {t("heroHeadlinePre")}{" "}
+            <span className="gradient-text">{t("heroHeadlineHighlight")}</span>
+            {" "}{t("heroHeadlinePost")}
           </h1>
 
           {/* ── Subheadline ── */}
           <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 mb-10 leading-relaxed max-w-2xl">
-            From <span className="text-slate-700 dark:text-slate-300 font-medium">HTML</span> to{" "}
-            <span className="text-slate-700 dark:text-slate-300 font-medium">Kubernetes</span> — concise explanations,
-            real code examples, and interactive quizzes for every topic.
+            {t("heroSub")}
           </p>
 
           {/* ── CTA Buttons ── */}
@@ -44,14 +46,14 @@ export function HeroSection() {
               className="group flex items-center gap-2.5 px-8 py-4 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-semibold text-base transition-all shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5"
             >
               <BookOpen className="w-5 h-5" />
-              Start Learning
+              {t("heroStart")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <a
               href="#topics"
               className="flex items-center gap-2 px-8 py-4 rounded-full bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 font-semibold text-base border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition-all"
             >
-              Browse Topics
+              {t("heroBrowse")}
             </a>
           </div>
 
@@ -69,7 +71,7 @@ export function HeroSection() {
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
                   </div>
                   <div className="text-left">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">React quiz done!</div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{t("heroCardQuizDone")}</div>
                     <div className="text-[11px] text-slate-400 dark:text-slate-500">7 / 8 correct · 87%</div>
                   </div>
                 </div>
@@ -84,7 +86,7 @@ export function HeroSection() {
                     <Flame className="w-4 h-4 text-amber-500" />
                   </div>
                   <div className="text-left">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">24 topics ready</div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{t("heroCardTopics")}</div>
                     <div className="text-[11px] text-slate-400 dark:text-slate-500">HTML → Kubernetes</div>
                   </div>
                 </div>
@@ -99,8 +101,8 @@ export function HeroSection() {
                     <Star className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                   </div>
                   <div className="text-left">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Free forever</div>
-                    <div className="text-[11px] text-slate-400 dark:text-slate-500">No signup needed</div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">{t("heroCardFree")}</div>
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500">{t("heroCardNoSignup")}</div>
                   </div>
                 </div>
               </div>

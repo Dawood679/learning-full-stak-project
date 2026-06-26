@@ -1,12 +1,13 @@
 "use client"
 
-import { useCallback, useReducer } from "react"
+import { useCallback, useEffect, useReducer, useRef } from "react"
 import { saveScore } from "@/lib/quiz-storage"
 import { QuizProgressBar } from "./QuizProgressBar"
 import { AnswerOption } from "./AnswerOption"
 import { ExplanationPanel } from "./ExplanationPanel"
 import { ScoreScreen } from "./ScoreScreen"
 import { ArrowRight } from "lucide-react"
+import { useT } from "@/lib/i18n/LanguageContext"
 
 // State machine
 const initialState = (questions) => ({
@@ -50,6 +51,8 @@ function reducer(state, action) {
 
 export function QuizContainer({ questions, slug, topicTitle }) {
   const [state, dispatch] = useReducer(reducer, null, () => initialState(questions))
+  const t = useT()
+  const submittedRef = useRef(false)
 
   const handleAnswer = useCallback((index) => {
     dispatch({ type: "SELECT_ANSWER", index })
@@ -60,11 +63,16 @@ export function QuizContainer({ questions, slug, topicTitle }) {
   }, [])
 
   const handleRetry = useCallback(() => {
+    submittedRef.current = false
     dispatch({ type: "RETRY" })
   }, [])
 
-  // When entering complete phase, save score
-  if (state.phase === "complete" && state.answers.length > 0) {
+  // Submit to server when quiz completes (once per attempt)
+  useEffect(() => {
+    if (state.phase !== "complete" || state.answers.length === 0) return
+    if (submittedRef.current) return
+    submittedRef.current = true
+
     const correct = state.answers.filter((a, i) => a === questions[i].correctAnswer).length
     const percentage = Math.round((correct / questions.length) * 100)
 
@@ -77,6 +85,29 @@ export function QuizContainer({ questions, slug, topicTitle }) {
       completedAt: new Date().toISOString(),
       answers: state.answers,
     })
+
+    // Submit to server for attendance marking (silently, no blocking)
+    fetch("/api/quiz-submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topicSlug: slug,
+        score: correct,
+        total: questions.length,
+        answers: state.answers.map((selected, i) => ({
+          questionId: questions[i].id,
+          selectedAnswer: selected,
+          correct: selected === questions[i].correctAnswer,
+        })),
+      }),
+    }).catch(() => {
+      // Silently ignore — localStorage still saved locally
+    })
+  }, [state.phase, state.answers, questions, slug])
+
+  if (state.phase === "complete" && state.answers.length > 0) {
+    const correct = state.answers.filter((a, i) => a === questions[i].correctAnswer).length
+    const percentage = Math.round((correct / questions.length) * 100)
 
     return (
       <div className="max-w-2xl mx-auto">
@@ -145,7 +176,7 @@ export function QuizContainer({ questions, slug, topicTitle }) {
             onClick={handleNext}
             className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-violet-500/20 hover:-translate-y-0.5"
           >
-            {state.currentIndex + 1 === questions.length ? "See Results" : "Next Question"}
+            {state.currentIndex + 1 === questions.length ? t("quizSeeResults") : t("quizNext")}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

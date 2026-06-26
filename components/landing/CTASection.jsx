@@ -1,7 +1,12 @@
+"use client"
+
 import Link from "next/link"
 import { ArrowRight, BookOpen } from "lucide-react"
+import { useT } from "@/lib/i18n/LanguageContext"
 
 export function CTASection() {
+  const t = useT()
+
   return (
     <section className="py-20 bg-slate-50 dark:bg-[#07070f]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,17 +21,17 @@ export function CTASection() {
 
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Ready to level up your skills?
+              {t("ctaTitle")}
             </h2>
             <p className="text-violet-200 text-lg mb-8 max-w-lg mx-auto">
-              Start with any topic — no signup, no paywalls, no fluff. Just learn.
+              {t("ctaSub")}
             </p>
             <Link
               href="/learn"
               className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-white text-violet-700 font-bold text-base hover:bg-violet-50 transition-all shadow-xl shadow-black/20 hover:-translate-y-0.5"
             >
               <BookOpen className="w-5 h-5" />
-              Browse All 24 Topics
+              {t("ctaButton")}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

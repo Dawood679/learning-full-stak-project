@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
+import { LanguageProvider } from "@/lib/i18n/LanguageContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { SmoothScroll } from "@/components/SmoothScroll"
@@ -41,11 +42,13 @@ export default function RootLayout({ children }) {
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <SmoothScroll>
-            <Navbar />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-          </SmoothScroll>
+          <LanguageProvider>
+            <SmoothScroll>
+              <Navbar />
+              <main className="min-h-screen">{children}</main>
+              <Footer />
+            </SmoothScroll>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

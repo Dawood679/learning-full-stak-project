@@ -1,14 +1,19 @@
+"use client"
+
 import Link from "next/link"
 import { Trophy, RotateCcw, ArrowLeft, CheckCircle2, XCircle } from "lucide-react"
-
-function getScoreMessage(percentage) {
-  if (percentage >= 90) return { title: "Outstanding! 🏆", sub: "You've mastered this topic!", color: "text-emerald-600 dark:text-emerald-400" }
-  if (percentage >= 70) return { title: "Great work! 🎉", sub: "You've got a solid understanding.", color: "text-blue-600 dark:text-blue-400" }
-  if (percentage >= 50) return { title: "Good effort! 💪", sub: "Review the explanations and try again.", color: "text-amber-600 dark:text-amber-400" }
-  return { title: "Keep practicing! 📚", sub: "Read the topic again and retry.", color: "text-rose-600 dark:text-rose-400" }
-}
+import { useT } from "@/lib/i18n/LanguageContext"
 
 export function ScoreScreen({ score, total, percentage, slug, answers, questions, onRetry }) {
+  const t = useT()
+
+  function getScoreMessage(pct) {
+    if (pct >= 90) return { title: t("scoreOutstanding"), sub: t("scoreMastered"), color: "text-emerald-600 dark:text-emerald-400" }
+    if (pct >= 70) return { title: t("scoreGreat"),       sub: t("scoreSolid"),    color: "text-blue-600 dark:text-blue-400" }
+    if (pct >= 50) return { title: t("scoreGood"),        sub: t("scoreReview"),   color: "text-amber-600 dark:text-amber-400" }
+    return           { title: t("scoreKeepPracticing"), sub: t("scoreRetry"),    color: "text-rose-600 dark:text-rose-400" }
+  }
+
   const message = getScoreMessage(percentage)
 
   return (
@@ -26,7 +31,7 @@ export function ScoreScreen({ score, total, percentage, slug, answers, questions
         {percentage}%
       </div>
       <div className="text-slate-500 dark:text-slate-400 text-lg mb-2">
-        {score} out of {total} correct
+        {score} / {total} {t("scoreCorrect")}
       </div>
       <h2 className={`text-2xl font-bold mb-1 ${message.color}`}>{message.title}</h2>
       <p className="text-slate-500 dark:text-slate-400 mb-8">{message.sub}</p>
@@ -38,21 +43,21 @@ export function ScoreScreen({ score, total, percentage, slug, answers, questions
           className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full border-2 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 font-semibold hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
-          Try Again
+          {t("quizTryAgain")}
         </button>
         <Link
           href={`/learn/${slug}`}
           className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 text-white font-semibold hover:opacity-90 transition-opacity"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Topic
+          {t("quizBackToTopic")}
         </Link>
       </div>
 
       {/* Answer review */}
       <div className="w-full max-w-2xl text-left space-y-3">
         <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider mb-4">
-          Answer Review
+          {t("quizAnswerReview")}
         </h3>
         {questions.map((q, i) => {
           const isCorrect = answers[i] === q.correctAnswer
@@ -75,7 +80,7 @@ export function ScoreScreen({ score, total, percentage, slug, answers, questions
                 </p>
                 {!isCorrect && (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Correct: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{q.options[q.correctAnswer]}</span>
+                    {t("quizCorrectAnswer")}: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{q.options[q.correctAnswer]}</span>
                   </p>
                 )}
               </div>
