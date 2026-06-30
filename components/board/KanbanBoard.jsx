@@ -26,7 +26,7 @@ function buildColumns(tickets) {
   return map
 }
 
-export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmin = false, onDelete }) {
+export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmin = false, onDelete, students = [] }) {
   const [tickets, setTickets]           = useState(initialTickets)
   const [activeTicket, setActiveTicket] = useState(null)
   const [selectedTicket, setSelectedTicket] = useState(null)
@@ -89,6 +89,11 @@ export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmi
     onDelete?.(id)
   }, [onDelete])
 
+  const handleUpdate = useCallback((updated) => {
+    setTickets((ts) => ts.map((t) => t.id === updated.id ? updated : t))
+    setSelectedTicket(updated)
+  }, [])
+
   // Called by AdminBoardClient when a new ticket is created
   KanbanBoard.addTicket = (ticket) => setTickets((ts) => [ticket, ...ts])
 
@@ -130,6 +135,9 @@ export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmi
       <TicketDetailModal
         ticket={selectedTicket}
         onClose={() => setSelectedTicket(null)}
+        isAdmin={isAdmin}
+        students={students}
+        onUpdate={handleUpdate}
       />
     </div>
   )

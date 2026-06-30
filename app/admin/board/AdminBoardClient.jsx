@@ -38,6 +38,7 @@ export default function AdminBoardClient({ initialTickets, students }) {
         isDraggable={true}
         isAdmin={true}
         onDelete={handleDeleted}
+        students={students}
       />
     </div>
   )
