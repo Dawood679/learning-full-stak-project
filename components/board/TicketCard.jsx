@@ -11,7 +11,7 @@ const PRIORITY_STYLES = {
   LOW:    "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
 }
 
-export default function TicketCard({ ticket, isDraggable = true, isAdmin = false, onDelete }) {
+export default function TicketCard({ ticket, isDraggable = true, isAdmin = false, onDelete, onOpen }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: ticket.id })
 
@@ -34,9 +34,10 @@ export default function TicketCard({ ticket, isDraggable = true, isAdmin = false
     <div
       ref={setNodeRef}
       style={style}
+      onClick={() => !isDragging && onOpen?.(ticket)}
       className={cn(
         "bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800",
-        "p-3 shadow-sm hover:shadow-md transition-shadow select-none group",
+        "p-3 shadow-sm hover:shadow-md transition-shadow select-none group cursor-pointer",
         isDragging && "shadow-lg ring-2 ring-violet-500/40"
       )}
     >

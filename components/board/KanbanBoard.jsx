@@ -12,6 +12,7 @@ import {
 import { SortableContext } from "@dnd-kit/sortable"
 import KanbanColumn from "./KanbanColumn"
 import TicketCard from "./TicketCard"
+import TicketDetailModal from "./TicketDetailModal"
 
 const COLUMNS = ["BACKLOG", "TODO", "IN_PROGRESS", "REVIEW", "DONE"]
 const COLUMN_SET = new Set(COLUMNS)
@@ -26,9 +27,10 @@ function buildColumns(tickets) {
 }
 
 export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmin = false, onDelete }) {
-  const [tickets, setTickets]         = useState(initialTickets)
+  const [tickets, setTickets]           = useState(initialTickets)
   const [activeTicket, setActiveTicket] = useState(null)
-  const [error, setError]             = useState(null)
+  const [selectedTicket, setSelectedTicket] = useState(null)
+  const [error, setError]               = useState(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -113,6 +115,7 @@ export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmi
               isDraggable={isDraggable}
               isAdmin={isAdmin}
               onDelete={handleDelete}
+              onTicketClick={setSelectedTicket}
             />
           ))}
         </div>
@@ -123,6 +126,11 @@ export default function KanbanBoard({ initialTickets, isDraggable = true, isAdmi
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <TicketDetailModal
+        ticket={selectedTicket}
+        onClose={() => setSelectedTicket(null)}
+      />
     </div>
   )
 }

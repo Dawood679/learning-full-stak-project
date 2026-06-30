@@ -13,7 +13,7 @@ const COLUMN_META = {
   DONE:        { label: "Done",         dot: "bg-green-500",   header: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400" },
 }
 
-export default function KanbanColumn({ id, tickets, isDraggable, isAdmin, onDelete }) {
+export default function KanbanColumn({ id, tickets, isDraggable, isAdmin, onDelete, onTicketClick }) {
   const { setNodeRef, isOver } = useDroppable({ id })
   const meta = COLUMN_META[id]
 
@@ -44,6 +44,7 @@ export default function KanbanColumn({ id, tickets, isDraggable, isAdmin, onDele
               isDraggable={isDraggable}
               isAdmin={isAdmin}
               onDelete={onDelete}
+              onOpen={onTicketClick}
             />
           ))}
         </SortableContext>
